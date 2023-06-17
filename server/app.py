@@ -77,7 +77,7 @@ def reviews():
         return response
 
 
-@app.route("/reviews/<int:id>", methods=["GET", "DELETE"])
+@app.route("/reviews/<int:id>", methods=["GET", "PATCH", "DELETE"])
 def review_by_id(id):
     review = Review.query.filter(Review.id == id).first()
 
@@ -85,6 +85,18 @@ def review_by_id(id):
         review_dict = review.to_dict()
 
         response = make_response(review_dict, 200)
+        return response
+
+    elif request.method == "PATCH":
+        review = Review.query.filter(Review.id == id).first()
+        for attr in request.form:
+            setattr(review, attr, request.form.get(attr))
+
+        db.session.add(review)
+        db.session.commit()
+
+        dict_version = review.to_dict()
+        response = make_response(dict_version, 200)
         return response
 
     elif request.method == "DELETE":
